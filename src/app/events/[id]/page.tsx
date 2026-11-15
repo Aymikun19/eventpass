@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/supabase/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
@@ -15,7 +16,7 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
     .order("created_at");
   const list = regs ?? [];
   const checked = list.filter((r) => r.checked_in_at).length;
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const site = SITE_URL;
 
   return (
     <div className="grid gap-6">

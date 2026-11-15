@@ -1,4 +1,5 @@
 import "server-only";
+import { SITE_URL } from "@/lib/supabase/config";
 import QRCode from "qrcode";
 import { fmtDate } from "./slug";
 
@@ -13,7 +14,7 @@ export async function sendTicketEmail(opts: {
 }) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false, error: "RESEND_API_KEY not set" };
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const site = SITE_URL;
   const png = await QRCode.toBuffer(opts.code, { width: 360, margin: 1 });
 
   const res = await fetch("https://api.resend.com/emails", {
