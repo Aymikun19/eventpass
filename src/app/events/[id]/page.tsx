@@ -1,3 +1,4 @@
+import { ScanLine } from "lucide-react";
 import { SITE_URL } from "@/lib/supabase/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,7 +26,9 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
           <h1 className="text-2xl font-semibold">{ev.title}</h1>
           <p className="text-sm text-stone-500">{fmtDate(ev.starts_at)} · {ev.venue}</p>
         </div>
-        <Link href={`/events/${id}/scan`} className="btn">📷 Open door scanner</Link>
+        <Link href={`/events/${id}/scan`} className="btn">
+          <ScanLine size={16} aria-hidden /> Open door scanner
+        </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

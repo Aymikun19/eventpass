@@ -1,3 +1,5 @@
+<img src="public/logo.svg" alt="" width="64" height="64">
+
 # EventPass: QR Tickets & Door Check-in
 
 Run free events without spreadsheets. Organisers create an event and share a link. Attendees register and get an **emailed QR ticket**. At the door, any phone becomes a **scanner** that checks people in live.

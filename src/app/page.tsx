@@ -16,7 +16,7 @@ export default async function Home() {
       <div>
         <h1 className="text-2xl font-semibold">Your events</h1>
         <div className="mt-4 grid gap-3">
-          {(events ?? []).length === 0 && <p className="card p-6 text-sm text-stone-500">No events yet. Create one →</p>}
+          {(events ?? []).length === 0 && <p className="card p-6 text-sm text-stone-500">No events yet. Create your first one with the form.</p>}
           {(events ?? []).map((e) => {
             const count = (e.registrations as unknown as { count: number }[])[0]?.count ?? 0;
             return (

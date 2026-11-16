@@ -1,3 +1,4 @@
+import { MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fmtDate } from "@/lib/slug";
@@ -14,7 +15,11 @@ export default async function PublicEvent({ params }: { params: Promise<{ slug: 
       <div>
         <p className="text-sm font-medium text-accent">{fmtDate(ev.starts_at)}</p>
         <h1 className="mt-1 text-3xl font-bold">{ev.title}</h1>
-        {ev.venue && <p className="mt-1 text-stone-500">📍 {ev.venue}</p>}
+        {ev.venue && (
+          <p className="mt-1 inline-flex items-center gap-1.5 text-stone-500">
+            <MapPin size={16} aria-hidden /> {ev.venue}
+          </p>
+        )}
         {ev.description && <p className="mt-4 whitespace-pre-wrap text-stone-700">{ev.description}</p>}
       </div>
       {closed ? <p className="card p-5 text-center text-stone-500">Registration has closed.</p> : <RegisterForm slug={slug} />}

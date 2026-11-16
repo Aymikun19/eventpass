@@ -26,7 +26,7 @@ export async function sendTicketEmail(opts: {
       subject: `Your ticket: ${opts.eventTitle}`,
       html: `
         <div style="font-family:system-ui,sans-serif;max-width:480px;margin:auto;text-align:center">
-          <h2>You're in, ${opts.name.split(" ")[0]}! 🎟️</h2>
+          <h2>You're in, ${opts.name.split(" ")[0]}!</h2>
           <p><b>${opts.eventTitle}</b><br>${fmtDate(opts.startsAt)}${opts.venue ? `<br>${opts.venue}` : ""}</p>
           <img src="cid:ticket-qr" width="240" height="240" alt="Ticket QR code" />
           <p>Show this QR code at the door.</p>

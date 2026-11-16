@@ -1,5 +1,7 @@
 "use client";
 
+import { CircleCheck, Ticket } from "lucide-react";
+
 import Link from "next/link";
 import { useActionState } from "react";
 import { register, type RegisterState } from "@/app/actions";
@@ -9,11 +11,14 @@ export function RegisterForm({ slug }: { slug: string }) {
   if (state.code) {
     return (
       <div className="card p-6 text-center">
-        <p className="text-lg font-semibold">{state.again ? "You were already registered 👍" : "You're registered! 🎉"}</p>
+        <CircleCheck size={40} className="mx-auto text-accent" aria-hidden />
+        <p className="mt-2 text-lg font-semibold">{state.again ? "You were already registered" : "You're registered!"}</p>
         <p className="mt-2 text-sm text-stone-500">
           {state.emailed ? "Your QR ticket is on its way to your inbox." : "Save your ticket below."}
         </p>
-        <Link className="btn mt-4" href={`/t/${state.code}`}>View my ticket</Link>
+        <Link className="btn mt-4" href={`/t/${state.code}`}>
+          <Ticket size={16} aria-hidden /> View my ticket
+        </Link>
       </div>
     );
   }

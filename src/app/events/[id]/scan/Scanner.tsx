@@ -1,5 +1,7 @@
 "use client";
 
+import { CircleCheck, CircleX } from "lucide-react";
+
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { checkIn, type CheckInResult } from "@/app/actions";
@@ -36,13 +38,21 @@ export function Scanner({ eventId }: { eventId: string }) {
       <div id="reader" className="overflow-hidden rounded-2xl bg-black" />
       {result && (
         <div className={`rounded-2xl p-5 text-center text-white ${tone}`}>
-          {result.status === "ok" && <p className="text-lg font-semibold">✓ Welcome, {result.name}!</p>}
+          {result.status === "ok" && (
+            <p className="inline-flex items-center gap-2 text-lg font-semibold">
+              <CircleCheck size={22} aria-hidden /> Welcome, {result.name}!
+            </p>
+          )}
           {result.status === "already" && (
             <p className="text-lg font-semibold">
               {result.name} already checked in at {new Date(result.at).toLocaleTimeString("en-NG")}
             </p>
           )}
-          {result.status === "invalid" && <p className="text-lg font-semibold">✕ Invalid ticket for this event</p>}
+          {result.status === "invalid" && (
+            <p className="inline-flex items-center gap-2 text-lg font-semibold">
+              <CircleX size={22} aria-hidden /> Invalid ticket for this event
+            </p>
+          )}
         </div>
       )}
       <form
