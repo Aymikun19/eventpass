@@ -26,6 +26,7 @@ export default async function Ticket({ params }: { params: Promise<{ code: strin
           {t.checked_in_at && <p className="badge mt-3 inline-block !bg-emerald-100 !text-emerald-800">Checked in</p>}
         </div>
       </div>
+      <p className="mt-4 text-center text-sm text-stone-500">Show this QR code at the door. A screenshot works too.</p>
     </div>
   );
 }

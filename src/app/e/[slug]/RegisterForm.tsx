@@ -23,11 +23,15 @@ export function RegisterForm({ slug }: { slug: string }) {
     );
   }
   return (
-    <form action={action} className="card grid gap-3 p-6">
-      <label className="field"><span>Full name</span><input name="name" required /></label>
-      <label className="field"><span>Email</span><input name="email" type="email" required /></label>
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button className="btn" disabled={pending}>{pending ? "Registering…" : "Get my ticket"}</button>
+    <form action={action} className="card grid gap-4 p-6">
+      <div>
+        <h2 className="text-lg font-semibold">Register</h2>
+        <p className="text-sm text-stone-500">Free. Your QR ticket arrives by email.</p>
+      </div>
+      <label className="field"><span>Full name</span><input name="name" required autoComplete="name" /></label>
+      <label className="field"><span>Email</span><input name="email" type="email" required autoComplete="email" /></label>
+      {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
+      <button className="btn !py-3" disabled={pending}><Ticket size={16} aria-hidden /> {pending ? "Registering…" : "Get my ticket"}</button>
     </form>
   );
 }

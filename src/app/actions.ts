@@ -76,3 +76,32 @@ export async function checkIn(eventId: string, code: string): Promise<CheckInRes
   revalidatePath(`/events/${eventId}`);
   return { status: "ok", name: reg.name };
 }
+
+export async function updateEvent(id: string, _prev: { error?: string; ok?: boolean }, form: FormData): Promise<{ error?: string; ok?: boolean }> {
+  const { supabase } = await requireUser();
+  const parsed = eventSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const startsAt = new Date(parsed.data.starts_at + ":00+01:00").toISOString();
+  const { error } = await supabase.from("events").update({ ...parsed.data, starts_at: startsAt }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath(`/events/${id}`);
+  return { ok: true };
+}
+
+export async function deleteEvent(id: string) {
+  const { supabase } = await requireUser();
+  await supabase.from("events").delete().eq("id", id);
+  revalidatePath("/");
+  redirect("/");
+}
+
+/** Manual check-in (or undo) from the guest list. */
+export async function setCheckedIn(eventId: string, registrationId: string, checked: boolean) {
+  const { supabase } = await requireUser();
+  await supabase
+    .from("registrations")
+    .update({ checked_in_at: checked ? new Date().toISOString() : null })
+    .eq("id", registrationId)
+    .eq("event_id", eventId);
+  revalidatePath(`/events/${eventId}`);
+}
