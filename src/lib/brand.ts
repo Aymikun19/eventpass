@@ -26,5 +26,5 @@ export const brand = {
   nav: [{ href: "/", label: "Events" }] as { href: string; label: string; public?: boolean }[],
   width: "max-w-5xl",
   repo: "https://github.com/Aymikun19/eventpass",
-  preview: null as string | null,
+  preview: "/preview.webp" as string | null,
 };
