@@ -48,6 +48,11 @@ export function Scanner({ eventId }: { eventId: string }) {
               {result.name} already checked in at {new Date(result.at).toLocaleTimeString("en-NG")}
             </p>
           )}
+          {result.status === "not-confirmed" && (
+            <p className="inline-flex items-center gap-2 text-lg font-semibold">
+              <CircleX size={22} aria-hidden /> {result.name}: {result.reason}
+            </p>
+          )}
           {result.status === "invalid" && (
             <p className="inline-flex items-center gap-2 text-lg font-semibold">
               <CircleX size={22} aria-hidden /> Invalid ticket for this event

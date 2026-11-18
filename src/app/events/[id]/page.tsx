@@ -18,10 +18,12 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
   if (!ev) notFound();
   const { data: regs } = await supabase
     .from("registrations")
-    .select("id, name, email, checked_in_at, created_at")
+    .select("id, name, email, checked_in_at, created_at, status")
     .eq("event_id", id)
     .order("created_at");
-  const list = regs ?? [];
+  const all = regs ?? [];
+  const list = all.filter((r) => r.status === "confirmed");
+  const waitlist = all.filter((r) => r.status === "waitlisted");
   const checkins = list.filter((r) => r.checked_in_at).map((r) => r.checked_in_at as string);
   const link = `${SITE_URL}/e/${ev.slug}`;
   const qr = await QRCode.toDataURL(link, { width: 480, margin: 1, color: { dark: "#1c1917", light: "#ffffff" } });
@@ -50,7 +52,7 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
         <Stat icon={Users} label="Registered" value={`${list.length}`} hint={`of ${ev.capacity} places`} />
         <Stat icon={UserCheck} label="Checked in" value={String(checkins.length)} hint={started ? "Event has started" : "Doors not open yet"} />
         <Stat icon={Percent} label="Turnout" value={list.length ? `${Math.round((checkins.length / list.length) * 100)}%` : "–"} hint="Checked in / registered" />
-        <Stat icon={Ticket} label="Places left" value={String(Math.max(0, ev.capacity - list.length))} />
+        <Stat icon={Ticket} label={waitlist.length ? "Waitlist" : "Places left"} value={String(waitlist.length ? waitlist.length : Math.max(0, ev.capacity - list.length))} hint={waitlist.length ? "Promoted automatically when someone cancels" : undefined} />
       </div>
       <Meter value={list.length} max={ev.capacity} label="Capacity used" />
 
@@ -61,7 +63,7 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
               <h2 id="reg-chart" className="font-semibold">Registrations per day</h2>
               <span className="text-xs text-stone-500">{started ? "14 days before the event" : "Last 14 days"}</span>
             </div>
-            <BarChart label="Registrations per day" height={120} data={bucketByDay(list.map((r) => r.created_at), 14, end)} />
+            <BarChart label="Registrations per day" height={120} data={bucketByDay(all.filter((r) => r.status !== "cancelled").map((r) => r.created_at), 14, end)} />
           </section>
           {checkins.length > 0 && (
             <section className="card p-6" aria-labelledby="arrivals">
@@ -83,7 +85,7 @@ export default async function EventAdmin({ params }: { params: Promise<{ id: str
         </section>
       </div>
 
-      <GuestList eventId={id} regs={list} />
+      <GuestList eventId={id} regs={all} />
     </div>
   );
 }

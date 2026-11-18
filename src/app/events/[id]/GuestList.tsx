@@ -4,27 +4,31 @@ import { Search, UserCheck, UserX } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { setCheckedIn } from "@/app/actions";
 
-type Reg = { id: string; name: string; email: string; checked_in_at: string | null; created_at: string };
+type Reg = { id: string; name: string; email: string; checked_in_at: string | null; created_at: string; status: string };
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
 
 export function GuestList({ eventId, regs }: { eventId: string; regs: Reg[] }) {
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | "in" | "out">("all");
+  const [filter, setFilter] = useState<"all" | "in" | "out" | "waitlisted" | "cancelled">("all");
   const [pending, start] = useTransition();
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase();
     return regs.filter(
       (r) =>
         (!t || r.name.toLowerCase().includes(t) || r.email.toLowerCase().includes(t)) &&
-        (filter === "all" || (filter === "in" ? r.checked_in_at : !r.checked_in_at)),
+        (filter === "all"
+          ? r.status !== "cancelled"
+          : filter === "waitlisted" || filter === "cancelled"
+            ? r.status === filter
+            : r.status === "confirmed" && (filter === "in" ? r.checked_in_at : !r.checked_in_at)),
     );
   }, [regs, q, filter]);
 
   return (
     <section className="card overflow-hidden" aria-labelledby="guests">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 p-4">
-        <h2 id="guests" className="font-semibold">Guest list <span className="font-normal text-stone-500">({regs.length})</span></h2>
+        <h2 id="guests" className="font-semibold">Guest list <span className="font-normal text-stone-500">({regs.filter((r) => r.status === "confirmed").length})</span></h2>
         <div className="flex flex-wrap gap-2">
           <label className="relative">
             <span className="sr-only">Search guests</span>
@@ -35,6 +39,8 @@ export function GuestList({ eventId, regs }: { eventId: string; regs: Reg[] }) {
             <option value="all">Everyone</option>
             <option value="in">Checked in</option>
             <option value="out">Not yet</option>
+            <option value="waitlisted">Waitlist</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
@@ -49,21 +55,25 @@ export function GuestList({ eventId, regs }: { eventId: string; regs: Reg[] }) {
                 <td className="px-4 py-3 font-medium">{r.name}</td>
                 <td className="px-4 py-3 text-stone-500">{r.email}</td>
                 <td className="px-4 py-3">
-                  {r.checked_in_at ? (
+                  {r.status === "waitlisted" ? (
+                    <span className="badge !bg-amber-100 !text-amber-800">Waitlist</span>
+                  ) : r.status === "cancelled" ? (
+                    <span className="badge !bg-stone-200 !text-stone-500">Cancelled</span>
+                  ) : r.checked_in_at ? (
                     <span className="badge !bg-emerald-100 !text-emerald-800">In at {time(r.checked_in_at)}</span>
                   ) : (
                     <span className="badge">Registered</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button
+                  {r.status === "confirmed" && <button
                     type="button"
                     disabled={pending}
                     onClick={() => start(() => setCheckedIn(eventId, r.id, !r.checked_in_at))}
                     className="btn-ghost !py-1.5 text-xs"
                   >
                     {r.checked_in_at ? <><UserX size={14} aria-hidden /> Undo</> : <><UserCheck size={14} aria-hidden /> Check in</>}
-                  </button>
+                  </button>}
                 </td>
               </tr>
             ))}

@@ -16,6 +16,7 @@ export default async function Home() {
     .from("events")
     .select("id, title, venue, starts_at, capacity, registrations(count)")
     .eq("owner_id", user.id)
+    .eq("registrations.status", "confirmed")
     .order("starts_at", { ascending: true });
   const events = (data ?? []) as unknown as Row[];
   const now = new Date().toISOString();

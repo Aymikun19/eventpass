@@ -30,7 +30,7 @@ export async function createEvent(_prev: { error?: string }, form: FormData): Pr
   redirect(`/events/${data.id}`);
 }
 
-export type RegisterState = { error?: string; code?: string; emailed?: boolean; again?: boolean };
+export type RegisterState = { error?: string; code?: string; emailed?: boolean; again?: boolean; waitlisted?: boolean };
 
 export async function register(slug: string, _prev: RegisterState, form: FormData): Promise<RegisterState> {
   const parsed = z
@@ -41,7 +41,7 @@ export async function register(slug: string, _prev: RegisterState, form: FormDat
   const supabase = await createClient();
   const { data, error } = await supabase
     .rpc("register_for_event", { p_slug: slug, p_name: parsed.data.name, p_email: parsed.data.email })
-    .single<{ ticket_code: string; event_title: string; already_registered: boolean }>();
+    .single<{ ticket_code: string; event_title: string; already_registered: boolean; waitlisted: boolean }>();
   if (error || !data) return { error: error?.message ?? "Could not register" };
 
   const { data: ev } = await supabase.from("events").select("venue, starts_at").eq("slug", slug).single();
@@ -52,13 +52,34 @@ export async function register(slug: string, _prev: RegisterState, form: FormDat
     eventTitle: data.event_title,
     venue: ev?.venue ?? null,
     startsAt: ev?.starts_at ?? new Date().toISOString(),
+    kind: data.waitlisted ? "waitlist" : "ticket",
   });
-  return { code: data.ticket_code, emailed: mail.ok, again: data.already_registered };
+  return { code: data.ticket_code, emailed: mail.ok, again: data.already_registered, waitlisted: data.waitlisted };
+}
+
+/** Attendee cancels with their ticket code; the first person on the waitlist is promoted and emailed. */
+export async function cancelTicket(code: string): Promise<{ error?: string }> {
+  if (!/^[0-9a-f-]{36}$/i.test(code)) return { error: "Invalid ticket" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("cancel_registration", { p_code: code });
+  if (error) return { error: error.message };
+  const promoted = (data ?? [])[0] as
+    | { promoted_code: string; promoted_name: string; promoted_email: string; event_title: string; venue: string | null; starts_at: string }
+    | undefined;
+  if (promoted) {
+    await sendTicketEmail({
+      to: promoted.promoted_email, name: promoted.promoted_name, code: promoted.promoted_code,
+      eventTitle: promoted.event_title, venue: promoted.venue, startsAt: promoted.starts_at, kind: "promoted",
+    });
+  }
+  revalidatePath(`/t/${code}`);
+  return {};
 }
 
 export type CheckInResult =
   | { status: "ok"; name: string }
   | { status: "already"; name: string; at: string }
+  | { status: "not-confirmed"; name: string; reason: string }
   | { status: "invalid" };
 
 export async function checkIn(eventId: string, code: string): Promise<CheckInResult> {
@@ -66,11 +87,12 @@ export async function checkIn(eventId: string, code: string): Promise<CheckInRes
   if (!/^[0-9a-f-]{36}$/i.test(code)) return { status: "invalid" };
   const { data: reg } = await supabase
     .from("registrations")
-    .select("id, name, checked_in_at")
+    .select("id, name, checked_in_at, status")
     .eq("event_id", eventId)
     .eq("ticket_code", code)
     .maybeSingle();
   if (!reg) return { status: "invalid" }; // wrong event, or not the owner (RLS)
+  if (reg.status !== "confirmed") return { status: "not-confirmed", name: reg.name, reason: reg.status === "waitlisted" ? "On the waitlist, not confirmed" : "This ticket was cancelled" };
   if (reg.checked_in_at) return { status: "already", name: reg.name, at: reg.checked_in_at };
   await supabase.from("registrations").update({ checked_in_at: new Date().toISOString() }).eq("id", reg.id);
   revalidatePath(`/events/${eventId}`);

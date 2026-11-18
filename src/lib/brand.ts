@@ -1,4 +1,4 @@
-import { ChartLine, FileDown, Mail, QrCode, ScanLine, Users } from "lucide-react";
+import { ChartLine, FileDown, Mail, ListOrdered, ScanLine, Users } from "lucide-react";
 
 export const brand = {
   name: "EventPass",
@@ -14,8 +14,8 @@ export const brand = {
     { icon: ScanLine, title: "Phone-camera scanner", text: "Open the scanner on any phone at the door. Duplicate and invalid tickets are flagged instantly." },
     { icon: ChartLine, title: "Live event dashboard", text: "Registrations, check-ins, capacity left and a check-in timeline that updates as people arrive." },
     { icon: Users, title: "Searchable guest list", text: "Find anyone by name or email and check them in by hand when they forget their ticket." },
-    { icon: QrCode, title: "Share kit", text: "Copy the registration link or download a QR code for your flyers and WhatsApp groups." },
-    { icon: FileDown, title: "Attendee export", text: "Download the full guest list with check-in times as a CSV spreadsheet." },
+    { icon: ListOrdered, title: "Automatic waitlist", text: "When an event is full, new sign-ups join a waitlist. If someone cancels, the next person is promoted and emailed their ticket." },
+    { icon: FileDown, title: "Attendee export", text: "Download the full guest list with status and check-in times as a CSV spreadsheet." },
   ],
   steps: [
     ["Create the event", "Add a title, date, venue and capacity. Your public registration page is ready instantly."],
